@@ -11,7 +11,7 @@ const URL = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?retry
 
 function connect () {
   // mongoose.connect() retorna una promesa
-  return mongoose.connect(URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  return mongoose.connect(URL, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
 }
 
 module.exports = {
