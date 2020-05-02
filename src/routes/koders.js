@@ -1,10 +1,23 @@
 const express = require('express')
+
 const koders = require('../useCases/koders')
 const errHandling = require('../lib/errorHandling')
+
+const authMiddleware = require('../middlewares/auth')
+
 const router = express.Router()
 
+// midleware a nivel del router
+router.use((request, response, next) => {
+  console.log('Middleware router koders')
+  next()
+})
+
 // GET /koders/
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, (request, response, next) => {
+  console.log('Middleware en GET /koders')
+  next()
+}, async (req, res) => {
   try {
     const allKoders = await koders.getAll()
     res.json({
@@ -21,7 +34,7 @@ router.get('/', async (req, res) => {
   }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
     const koder = await koders.getById(id)
@@ -43,7 +56,7 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const koderCreated = await koders.create(req.body)
     res.json({
@@ -76,7 +89,7 @@ router.post('/', async (req, res) => {
 // }
 
 // DELETE /koders/:id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
     const koderDeleted = await koders.deleteById(id)
@@ -98,7 +111,7 @@ router.delete('/:id', async (req, res) => {
   }
 })
 // PATCH /koders/:id
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params
     const koderUpdated = await koders.updateById(id, req.body)
@@ -115,6 +128,27 @@ router.patch('/:id', async (req, res) => {
     res.json({
       success: false,
       errors: errHandling.errorsHandling(errors)
+    })
+  }
+})
+
+// signup --> registro
+// signin --> login
+router.post('/signup', async (req, res) => {
+  try {
+    const koderCreated = await koders.signup(req.body)
+    res.json({
+      success: true,
+      message: 'Koder registered',
+      data: {
+        koder: koderCreated
+      }
+    })
+  } catch (error) {
+    res.status(400)
+    res.json({
+      success: false,
+      errors: error.message
     })
   }
 })
